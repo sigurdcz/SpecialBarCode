@@ -46,7 +46,7 @@ The error response will contain the following data in JSON format:
   "productId": [Product ID or empty]
 }
 ```
-POST http://localhost/sigurd_specialbarcode/product/attribute
+POST sigurd_specialbarcode/product/attribute
 `Content-Type: application/json`
 ```json
 {
