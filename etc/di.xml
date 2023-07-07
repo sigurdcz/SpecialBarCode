@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Sigurd\SpecialBarCode\Logger\Handler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="Sigurd\SpecialBarCode\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">SpecialBarCodeLogger</argument>
+            <argument name="handlers"  xsi:type="array">
+                <item name="system" xsi:type="object">Sigurd\SpecialBarCode\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </type>
+    <preference for="Sigurd\SpecialBarCode\Logger\LoggerInterface" type="Sigurd\SpecialBarCode\Logger\Logger" />
+</config>
