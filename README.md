@@ -1,0 +1,2 @@
+# SpecialBarCode
+Magento Module
