@@ -71,7 +71,12 @@ class Attribute extends Action implements CsrfAwareActionInterface
             $product->setData('special_bar_code', $attributeValue);
             $this->productRepository->save($product);
 
-            $response = ['success' => true, 'message' => 'Product attribute updated successfully.', 'productId' => $productId];
+            $response = [
+                'success' => true,
+                'message' => 'Product attribute updated successfully.',
+                'productId' => $productId,
+                'attributeValue' => $attributeValue
+            ];
             $httpCode = 200;
 
             $this->logger->info('Product attribute updated.', ['productId' => $productId]);

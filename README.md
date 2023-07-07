@@ -26,7 +26,8 @@ If the request is processed successfully, a response with HTTP status code `200`
 {
   "success": true,
   "message": "Product attribute updated successfully.",
-  "productId": [Product ID]
+  "productId": [Product ID],
+  "attributeValue": "new_value"
 }
 ```
 

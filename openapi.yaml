@@ -41,6 +41,8 @@ paths:
                   productId:
                     type: integer
                     description: The ID of the updated product.
+                 attributeValue:
+                    type: string
         '400':
           description: Bad Request
         '404':
