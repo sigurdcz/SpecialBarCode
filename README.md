@@ -7,19 +7,20 @@ Magento Module
 This API endpoint allows you to update **SpecialBarCode** a product attribute using an HTTP POST request.
 
 ### Endpoint
-**POST/** `sigurd_specialbarcode/product/attribute`
+**POST/** `rest/V1/special-bar-code/:id`
 
 ### Request Parameters
+Url param:
+- `id` (int): The ID of the product to update the attribute for.
 
 The following required parameters must be included in the request body in JSON format:
 
-- `productId` (int): The ID of the product to update the attribute for.
+
 - `attributeValue` (string): The value of the attribute to be updated.
 
 `Content-Type: application/json`
 ```json
 {
-  "productId": 123,
   "attributeValue": "new_value"
 }
 ```

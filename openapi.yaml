@@ -1,13 +1,19 @@
 openapi: 3.0.0
 info:
-  title: SpecialBarCode
-  description: Magento Module
+  title: SpecialBarCode Magento Module
   version: 1.0.0
 paths:
-  /sigurd_specialbarcode/product/attribute:
+  /rest/V1/special-bar-code/{id}:
     post:
       summary: Update Product Attribute
       description: This API endpoint allows you to update SpecialBarCode a product attribute using an HTTP POST request.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the product to update the attribute for.
       requestBody:
         required: true
         content:
@@ -15,15 +21,11 @@ paths:
             schema:
               type: object
               properties:
-                productId:
-                  type: integer
-                  description: The ID of the product to update the attribute for.
                 attributeValue:
                   type: string
                   description: The value of the attribute to be updated.
-              required:
-                - productId
-                - attributeValue
+              example:
+                attributeValue: new_value
       responses:
         '200':
           description: Successful response
@@ -34,18 +36,78 @@ paths:
                 properties:
                   success:
                     type: boolean
-                    description: Indicates if the request was successful.
+                    description: Indicates if the update was successful.
                   message:
                     type: string
-                    description: A message indicating the status of the operation.
+                    description: A message indicating the result of the update.
                   productId:
                     type: integer
                     description: The ID of the updated product.
-                 attributeValue:
+                  attributeValue:
                     type: string
+                    description: The updated attribute value.
+              example:
+                success: true
+                message: Product attribute updated successfully.
+                productId: 123
+                attributeValue: new_value
         '400':
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates if the request was successful.
+                  message:
+                    type: string
+                    description: A description of the error.
+                  productId:
+                    type: string
+                    description: The ID of the product associated with the error.
+              example:
+                success: false
+                message: Bad Request
+                productId: 123
         '404':
           description: Product Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates if the request was successful.
+                  message:
+                    type: string
+                    description: A description of the error.
+                  productId:
+                    type: string
+                    description: The ID of the product associated with the error.
+              example:
+                success: false
+                message: Product Not Found
+                productId: 123
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates if the request was successful.
+                  message:
+                    type: string
+                    description: A description of the error.
+                  productId:
+                    type: string
+                    description: The ID of the product associated with the error.
+              example:
+                success: false
+                message: Server Error
+                productId: 123

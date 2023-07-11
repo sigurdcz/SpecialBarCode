@@ -15,4 +15,5 @@
         </arguments>
     </type>
     <preference for="Sigurd\SpecialBarCode\Logger\LoggerInterface" type="Sigurd\SpecialBarCode\Logger\Logger" />
+    <preference for="Sigurd\SpecialBarCode\Api\BarCodeApiInterface" type="Sigurd\SpecialBarCode\Controller\Product\Attribute"/>
 </config>

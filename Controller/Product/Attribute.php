@@ -2,22 +2,27 @@
 
 namespace Sigurd\SpecialBarCode\Controller\Product;
 
-use BadMethodCallException;
 use Exception;
-use Laminas\Http\Request;
 use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Catalog\Model\Product;
-use Magento\Framework\App\Action\Action;
-use Magento\Framework\App\Action\Context;
-use Magento\Framework\App\CsrfAwareActionInterface;
-use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Controller\ResultFactory;
 use Sigurd\SpecialBarCode\Logger\Logger;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
-class Attribute extends Action implements CsrfAwareActionInterface
+class Attribute
 {
+    /**
+     * @var \Magento\Framework\App\RequestInterface
+     */
+    protected $request;
+
+    /**
+     * @var \Magento\Framework\App\ResponseInterface
+     */
+    protected $response;
+
     /**
      * @var ProductRepositoryInterface
      */
@@ -30,48 +35,50 @@ class Attribute extends Action implements CsrfAwareActionInterface
     private $logger;
 
     /**
-     * @param Context $context
+     * @var ResultFactory
+     */
+    private $resultFactory;
+
+    /**
      * @param ProductRepositoryInterface $productRepository
      * @param Logger $logger
-     */
+     * @param RequestInterface $request
+     * @param ResponseInterface $response
+    */
     public function __construct(
-        Context                    $context,
         ProductRepositoryInterface $productRepository,
-        Logger                     $logger
-    )
-    {
-        parent::__construct($context);
+        Logger $logger,
+        RequestInterface $request,
+        ResponseInterface $response,
+    ) {
+        $this->request = $request;
+        $this->response = $response;
         $this->productRepository = $productRepository;
         $this->logger = $logger;
     }
 
     /**
-     * Execute action
+     * @param string $attributeValue
+     * @return void
      */
-    public function execute()
+    public function update($attributeValue)
     {
+        // todo refactor to magento process
+        $parts = explode('/', $_SERVER['REQUEST_URI']);
+        $productId = end($parts);
+
         try {
-            // check method
-            if ($this->getRequest()->getMethod() != Request::METHOD_POST) {
-                throw new BadMethodCallException("Method Not Allowed", 1);
-            }
-
-            $requestData = json_decode($this->getRequest()->getContent(), true);
-
             //check validate
-            $errorMessages = $this->validate($requestData);
+            $errorMessages = $this->validate($attributeValue, $productId);
             if ($errorMessages) {
                 throw new BadRequestException(json_encode($errorMessages), 1);
             }
-
-            $attributeValue = isset($requestData['attributeValue']) ? $requestData['attributeValue'] : '';
-            $productId = isset($requestData['productId']) ? $requestData['productId'] : '';
 
             $product = $this->productRepository->getById($productId);
             $product->setData('special_bar_code', $attributeValue);
             $this->productRepository->save($product);
 
-            $response = [
+            $responseBody = [
                 'success' => true,
                 'message' => 'Product attribute updated successfully.',
                 'productId' => $productId,
@@ -81,31 +88,34 @@ class Attribute extends Action implements CsrfAwareActionInterface
 
             $this->logger->info('Product attribute updated.', ['productId' => $productId]);
         } catch (NoSuchEntityException $e) {
-            $response = ['success' => false, 'message' => 'Product not found.'];
+            $responseBody = ['success' => false, 'message' => 'Product not found.'];
             $httpCode = 404;
 
             $this->logger->error('Product not found.');
         } catch (Exception $e) {
-            $response = ['success' => false, 'message' => $e->getMessage()];
+            $responseBody = ['success' => false, 'message' => $e->getMessage()];
             $httpCode = 500;
 
             $this->logger->error($e->getMessage());
         }
 
-        $this->getResponse()->setHeader('Content-type', 'application/json');
-        $this->getResponse()->setHttpResponseCode($httpCode);
-        $this->getResponse()->setBody(json_encode($response));
+        $response = $this->response;
+        $response->getHeaders()->addHeaderLine('Content-Type', 'application/json');
+        $response->setStatusCode($httpCode);
+        $response->setContent(json_encode($responseBody));
+
+        $response->send();
+        exit();
     }
 
     /**
-     * @param array $requestData
+     * @param string $attributeValue
+     * @param string $productId
      * @return array
      */
-    private function validate(array $requestData): array
+    private function validate(string $attributeValue, string $productId): array
     {
         $messages = [];
-        $attributeValue = $requestData['attributeValue'] ?? '';
-        $productId = (int)($requestData['productId'] ?? '');
 
         // Validate productId
         if (!is_numeric($productId) || $productId <= 0) {
@@ -118,23 +128,5 @@ class Attribute extends Action implements CsrfAwareActionInterface
         }
 
         return $messages;
-    }
-
-    /**
-     * @param RequestInterface $request
-     * @return InvalidRequestException|null
-     */
-    public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
-    {
-        return null;
-    }
-
-    /**
-     * @param RequestInterface $request
-     * @return bool|null
-     */
-    public function validateForCsrf(RequestInterface $request): ?bool
-    {
-        return true;
     }
 }
